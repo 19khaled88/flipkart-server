@@ -20,12 +20,16 @@ const upload = require('../util/uploads.js')
 
 // const upload = multer({ storage })
 
-router.route('/product/create').post(
-  verifyToken,
-  // authorize('admin'),
-  upload.array('productPicture'),
-  productController.createProduct,
-)
+router
+  .route('/product/create')
+  .post(
+    verifyToken,
+    authorize('admin'),
+    upload.array('productPicture'),
+    productController.createProduct,
+  )
 router.route('/product/find').get(productController.getProduct)
+router.route('/product/details').get(productController.getProductDetails)
+router.route('/product/:slug').get(productController.getBySlug)
 
 module.exports = router

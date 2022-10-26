@@ -29,6 +29,9 @@ router
 router
   .route('/signup')
   .post(validateSignUpRequest, isRequestValidated, userController.signup)
+router
+  .route('/userList')
+  .get(verifyToken, authorize('admin'), userController.userList)
 
 router.route('/test').get(verifyToken, authorize('admin'), userController.test)
 module.exports = router

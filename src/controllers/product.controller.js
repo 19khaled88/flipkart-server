@@ -1,4 +1,5 @@
 const Product = require('../models/product')
+const Category = require('../models/category')
 const slugify = require('slugify')
 exports.createProduct = async (req, res) => {
   try {
@@ -50,7 +51,7 @@ exports.createProduct = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
   try {
-    const getProduct = await Product.find({})
+    const getProduct = await Product.find({}).select('name price quantity')
     res.status(200).json({
       getProduct,
     })
@@ -59,4 +60,48 @@ exports.getProduct = async (req, res) => {
       error,
     })
   }
+}
+
+exports.getProductDetails = async (req, res) => {
+  try {
+    const data = await Product.find({}).populate('category')
+    res.status(200).json({
+      data,
+    })
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+    })
+  }
+}
+
+exports.getBySlug = async (req, res) => {
+  const { slug } = req.params
+  
+   Category.findOne({ slug: slug })
+    .select("_id")
+    .exec((error, category) => {
+      if (error) return res.status(400).json({ error })
+      if (category) {
+       Product.find({ category: category._id }).exec((error, products) => {
+        if (error) return res.status(400).json({ error })
+        if(products.length > 0){
+          res.status(200).json({ 
+            products,
+            productByPrice:{
+              under5k:products.filter((product)=>product.price <= 5000),
+              under10k:products.filter((product)=>product.price > 5000  && product.price <= 10000),
+              under15k:products.filter((product)=>product.price > 10000 && product.price <= 15000),
+              under20k:products.filter((product)=>product.price > 15000 && product.price <= 20000),
+              under25k:products.filter((product)=>product.price > 20000 && product.price <= 25000),
+              under30k:products.filter((product)=>product.price > 25000 && product.price <= 30000),
+              under35k:products.filter((product)=>product.price > 30000 && product.price <= 35000),
+              under40k:products.filter((product)=>product.price > 35000 && product.price <= 40000),
+            }
+           })
+        }
+          
+        })
+      }
+    })
 }
